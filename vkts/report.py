@@ -3,7 +3,7 @@
 """Module for creating and sending program performance report
 in .txt and .html formats"""
 
-from vkts.usrdata import UsrData
+from .usrdata import UsrData
 import time, os, smtplib, json
 from email.mime.text import MIMEText
 from email.header    import Header

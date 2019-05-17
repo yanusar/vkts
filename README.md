@@ -12,6 +12,10 @@ Alternative way:
 
     $ sudo pip3 install vkts
 
+After installation you can test the application:
+
+    $ ./testall.py
+
 ### Setting
 
 First of all, you must enter data about at least one vk account. If you do not want to enter a password every vkts session, add a *fake* account. So password will be stored in your computer. Otherwise, add a *private* account.

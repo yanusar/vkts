@@ -3,10 +3,10 @@
 """Module for administering and monitoring vk.com communities"""
 
 import os, sys, time
-from vkts.report import Report
-import vkts.vklib as vk
-from vkts.vklib import apply_vk_method
-from vkts.usrdata import UsrData
+from .report import Report
+from . import vklib as vk
+from .vklib import apply_vk_method
+from .usrdata import UsrData
 
 def add_group_for_monitoring(group_id):
     """Add group_id in registry of monitoring groups"""

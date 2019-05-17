@@ -37,7 +37,7 @@ def read_reqs(fname):
 setup(
     name = 'vkts',
     fullname = 'VK Thematic Search',
-    version = '0.0.1',
+    version = '0.0.2',
     author = 'Denis Stepnov',
     author_email = 'stepnovdenis@gmail.com',
     url = 'https://github.com/smurphik/vkts',
@@ -50,7 +50,7 @@ setup(
     packages = find_packages(exclude=['tests']),
     install_requires = read_reqs('requirements.txt'),
     cmdclass = {'clean': CleanCommand},
-    entry_points = {'console_scripts': ['vkts = vkts.__main__:main']},
+    entry_points = {'console_scripts': ['vkts = vkts.main:main']},
     classifiers = [
         'Development Status :: 2 - Pre-Alpha',
         'Topic :: Internet :: WWW/HTTP',

@@ -5,11 +5,11 @@ thematic search, other console commands"""
 
 import sys, re
 from collections import Counter
-from vkts.report import Report
-import vkts.vklib as vk
-from vkts.vklib import apply_vk_method
-from vkts.usrdata import UsrData
-from vkts.utils import exception_handler
+from .report import Report
+from . import vklib as vk
+from .vklib import apply_vk_method
+from .usrdata import UsrData
+from .utils import exception_handler
 
 ####################################################################
 ##                        Account commands                        ##
@@ -59,7 +59,7 @@ def add_account():
         UsrData().set(acc_obj, 'acc', ac_type, ac_name, correct_is_act=True)
 
     except Exception as e:
-        exception_handler('Failed to enter account data')
+        exception_handler(e, 'Failed to enter account data')
 
 def delete_account(ac_type, ac_name):
     """Deletion account ac_name of type ac_type from registry"""
@@ -281,7 +281,7 @@ def add_university():
         UsrData().set(univ_obj, 'univ', un_name, correct_is_act=True)
 
     except Exception as e:
-        exception_handler('Failed to enter or add university data')
+        exception_handler(e, 'Failed to enter or add university data')
 
 def delete_university(un_name):
     """Deletion un_name from registry"""

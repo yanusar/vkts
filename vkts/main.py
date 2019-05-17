@@ -3,10 +3,10 @@
 """Realisation of access to the functionality of `vkts` via the console"""
 
 import sys, os
-from vkts import real
-from vkts import admreal as adm
-from vkts import vklib as vk
-from vkts import usrdata
+from . import real
+from . import admreal as adm
+from . import vklib as vk
+from . import usrdata
 
 commands_with_descr = \
 [
@@ -91,7 +91,7 @@ def main():
                 print(' '.join(['vkts'] + item))
         print('')
         sys.exit()
-    
+
     # Execute command
     if sys.argv[1] == 'ac_add':
         real.add_account()
@@ -120,8 +120,8 @@ def main():
         print(vk.resolve_user_ids(sys.argv[2]))
     
     # TODO: Не должно быть отдельных опций для исключений
-    # TODO: Иена опций неудачные
-    # TODO: опций, специфичныхдля конр. ВУЗа, не должно быть
+    # TODO: Имена опций неудачные
+    # TODO: опций, специфичных для конр. ВУЗа, не должно быть
     elif sys.argv[1] == 'grouppack_add':
         # Add group in data/groups_packs/pack by id or scrname
         vk.add_group_to_pack(sys.argv[2], sys.argv[3])

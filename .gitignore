@@ -107,3 +107,5 @@ venv.bak/
 # todo, notes, specific data...
 notes/
 
+*.swp
+

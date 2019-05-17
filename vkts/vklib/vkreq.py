@@ -6,7 +6,7 @@ many requests to packs by 25 requests."""
 
 import urllib.request, json, time, os, getpass
 from . import vkauth
-from vkts.usrdata import UsrData
+from ..usrdata import UsrData
 import logging
 from logging.handlers import RotatingFileHandler
 

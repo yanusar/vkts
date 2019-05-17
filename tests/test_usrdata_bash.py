@@ -11,11 +11,11 @@ def bash_cmd(args, stdin=None):
     return res.decode()
 
 def vkts_cmd(s, stdin=None):
-    args = ['python3', os.path.join(os.path.pardir, 'vkts')] + s.split()
+    args = ['vkts'] + s.split()
     res = bash_cmd(args, stdin)
     return res
 
-@pytest.mark.order1
+@pytest.mark.run(order=1)
 def test_vk_accounts():
 
     ###   $ vkts ac_add ... ; vkts ac_see
@@ -59,7 +59,7 @@ def test_vk_accounts():
     vkts_cmd('ac_rem vk ivan')
     assert '' == vkts_cmd('ac_see')
 
-@pytest.mark.order2
+@pytest.mark.run(order=2)
 def test_various_accounts():
 
     ###   $ vkts ac_add ... 4 times ; vkts ac_see
@@ -86,7 +86,7 @@ def test_various_accounts():
             'email\n    petka: \t[testB@mail.com|None]    \t<- activated\n\n'))
             == vkts_cmd('ac_see'))
 
-@pytest.mark.order3
+@pytest.mark.run(order=3)
 def test_universities():
 
     ###   $ vkts un_add ...
@@ -209,10 +209,10 @@ def test_universities():
             'Hot VK ids:        297 (54.5 %), 55111 (45.5 %)\n\n'))
             == vkts_cmd('un_see'))
 
-@pytest.mark.order4
+@pytest.mark.run(order=4)
 def test_broadcast():
 
-    bash_cmd(['rm', os.path.join('.vkts', 'adm_data.json')])
+    #bash_cmd(['rm', os.path.join('.vkts', 'adm_data.json')])
 
     ###   $ vkts broadcast_add testA@mail.com ; vkts broadcast_see
     vkts_cmd('broadcast_add testA@mail.com')
@@ -244,7 +244,7 @@ def test_broadcast():
     assert (''
             == vkts_cmd('broadcast_see'))
 
-@pytest.mark.order5
+@pytest.mark.run(order=5)
 def test_monitor():
 
     with open('.mock_request_responses.json', 'w') as fp:

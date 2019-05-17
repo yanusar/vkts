@@ -4,7 +4,7 @@
 
 import sys, json, os, time
 from .vkreq import apply_vk_method, Executor
-from vkts.utils import exception_handler
+from ..utils import exception_handler
 
 def _mkdir_rec(*dir_chain):
     """Recursive mkdir. For example, use `_mkdir_rec('a', 'b', 'c')` to create
@@ -78,7 +78,7 @@ class VKObj():
         return repr_
 
     def dump(self, rewrite=False):
-        """Save data about object"""
+        """Save data about object to data/obj/../"""
 
         # add date to object
         date = time.strftime("%F-%H%M%S")
@@ -97,7 +97,7 @@ class VKObj():
                 json.dump(old_version, fp)
 
     def dump_to_frozen(self):
-        """Save data about object"""
+        """Save data about object to data/frozen_obj/../"""
 
         # add date to object
         date = time.strftime("%F-%H%M%S")
@@ -412,8 +412,8 @@ class University(VKObj):
             self.ids = list(map(int, ids))
 
         except:
-            exception_handler('Invalid character in university name: '
-                              + '"{}"'.format(ch))
+            exception_handler(e, 'Invalid character in university name: '
+                                 + '"{}"'.format(ch))
 
     def _get_key(self):
         """Key for dump"""
