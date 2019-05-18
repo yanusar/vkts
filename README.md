@@ -21,7 +21,7 @@ After installation you can test the application:
 First of all, you must enter data about at least one vk account. If you do not want to enter a password every vkts session, add a *fake* account. So password will be stored in your computer. Otherwise, add a *private* account.
 
     $ mkdir vkts_work_dir
-    $ cd vkts_work_dir/
+    $ cd vkts_work_dir
     $ vkts ac_add
     What type of account do you want to create?
     Input please one letter - [e]mail, [v]k.ru
