@@ -16,7 +16,7 @@ After installation you can test the application:
 
     $ ./testall.py
 
-### Setting
+### Setup
 
 First of all, you must enter data about at least one vk account. If you do not want to enter a password every vkts session, add a *fake* account. So password will be stored in your computer. Otherwise, add a *private* account.
 
@@ -46,7 +46,7 @@ Now we can see result:
 
 Further customization should be done by commands *monitor_add*, *broadcast_add*, *un_add* (see *vkts --help*). But functionality associated with this data is currently unstable.
 
-### Using as application
+### Use as application
 
 Realisation of many commands is now in unstable state. But there is something useful.
 
@@ -66,7 +66,7 @@ Name resolution is more simple to use (it's useful with active manual work with 
     $ vkts resolve_user_ids durov
     (1, 'durov')
 
-### Using as a library
+### Use as a library
 
 So you can import `vkts` and it's submodules:
 

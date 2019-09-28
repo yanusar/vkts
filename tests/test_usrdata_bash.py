@@ -15,8 +15,7 @@ def vkts_cmd(s, stdin=None):
     res = bash_cmd(args, stdin)
     return res
 
-@pytest.mark.run(order=1)
-def test_vk_accounts():
+def test_01_vk_accounts():
 
     ###   $ vkts ac_add ... ; vkts ac_see
     stdin = '\n'.join(('v', 'ivan', 'f', 'testA@mail.com', 'pswdA', '|'))
@@ -59,8 +58,7 @@ def test_vk_accounts():
     vkts_cmd('ac_rem vk ivan')
     assert '' == vkts_cmd('ac_see')
 
-@pytest.mark.run(order=2)
-def test_various_accounts():
+def test_02_various_accounts():
 
     ###   $ vkts ac_add ... 4 times ; vkts ac_see
     stdin = '\n'.join(('v', 'ivan', 'f', 'testA@mail.com', 'pswdA', '|'))
@@ -86,8 +84,7 @@ def test_various_accounts():
             'email\n    petka: \t[testB@mail.com|None]    \t<- activated\n\n'))
             == vkts_cmd('ac_see'))
 
-@pytest.mark.run(order=3)
-def test_universities():
+def test_03_universities():
 
     ###   $ vkts un_add ...
     with open('.mock_request_responses.json', 'w') as fp:
@@ -209,8 +206,7 @@ def test_universities():
             'Hot VK ids:        297 (54.5 %), 55111 (45.5 %)\n\n'))
             == vkts_cmd('un_see'))
 
-@pytest.mark.run(order=4)
-def test_broadcast():
+def test_04_broadcast():
 
     #bash_cmd(['rm', os.path.join('.vkts', 'adm_data.json')])
 
@@ -244,8 +240,7 @@ def test_broadcast():
     assert (''
             == vkts_cmd('broadcast_see'))
 
-@pytest.mark.run(order=5)
-def test_monitor():
+def test_05_monitor():
 
     with open('.mock_request_responses.json', 'w') as fp:
         responses = \
