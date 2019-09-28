@@ -4,7 +4,7 @@
 `apply_vk_method`. For speedup you can use class `Executor`, wich pack
 many requests to packs by 25 requests."""
 
-import urllib.request
+import requests
 import json
 import time
 import os
@@ -84,8 +84,7 @@ def update_token():
     logger.debug("Token is updated")
 
 
-def _make_params_string(**params):
-    """Convert list of parameters to string"""
+def _set_token_to_params(params):
 
     # Add token & version (if user doesn't give specific this)
     if 'access_token' not in params:
@@ -93,26 +92,30 @@ def _make_params_string(**params):
     if 'v' not in params:
         params['v'] = '5.9'
 
-    p_str = '&'.join(['{}={}'.format(f, urllib.parse.quote(str(params[f])))
-                      for f in params.keys()])
+
+def _make_params_string(params):
+    """Convert list of parameters to string"""
+
+    p_str = '&'.join(['{}={}'.format(f, params[f]) for f in params.keys()])
     return p_str
 
 
 def _short_print(s):
-    # shrink output if it's too long
+    """shrink output if it's too long"""
     if len(s) <= 500:
         print(s)
     else:
         print('{}  ......  {}'.format(s[:245], s[-245:]))
 
 
-def _vk_api_error_print(obj, url_of_req, p_str):
+def _vk_api_error_print(obj, url_of_req, params):
     print("vk API error code: {}".format(obj['error_code']))
     print(obj['error_msg'])
-    _short_print("Broken request: {}{}".format(url_of_req, p_str))
+    _short_print("Broken request: {}{}".format(url_of_req,
+                                               _make_params_string(params)))
 
 
-def _vk_api_request(url_of_req, method, p_str):
+def _vk_api_request(url_of_req, method, params):
     """Request (can be mocked by existence of file
     '.mock_request_responses.json' for testing)."""
 
@@ -125,18 +128,14 @@ def _vk_api_request(url_of_req, method, p_str):
             json_obj = mocks_list.pop(0)
         with open(mock_responses, 'w') as fp:
             json.dump(mocks_list, fp)
+        return json_obj
 
     else:
 
         # Real request
         logger.debug("Try Request (method: %s)", method)
-        req = urllib.request.Request(url_of_req + '%s',
-                                     data=p_str.encode("ascii"))
-        with urllib.request.urlopen(req) as response:
-            the_page = response.read().decode("utf-8")
-        json_obj = json.loads(the_page)
-
-    return json_obj
+        response = requests.post(url_of_req, data=params)
+        return response.json()
 
 
 def apply_vk_method(method, handle_api_errors=True, **params):
@@ -150,7 +149,7 @@ def apply_vk_method(method, handle_api_errors=True, **params):
 
     # Set token to URL string
     url_of_req = 'https://api.vk.com/method/' + method + '?'
-    p_str = _make_params_string(**params)
+    _set_token_to_params(params)
 
     # Do request with error processing
     error_pause = 5
@@ -158,10 +157,11 @@ def apply_vk_method(method, handle_api_errors=True, **params):
 
         try:
             # Request
-            json_obj = _vk_api_request(url_of_req, method, p_str)
+            json_obj = _vk_api_request(url_of_req, method, params)
         except Exception as e:
             # In case of network problems.
             logger.debug("Request Error: " + str(e))
+            p_str = _make_params_string(params)
             _short_print("Broken request: {}{}".format(url_of_req, p_str))
             print(e)
             if error_pause > 35:
@@ -179,7 +179,7 @@ def apply_vk_method(method, handle_api_errors=True, **params):
                 if 'access_token' in params:
                     del params['access_token']
                 update_token()
-                p_str = _make_params_string(**params)
+                _set_token_to_params(params)
                 continue
             elif json_obj['error']['error_code'] == 6:
                 # It took a long time to create a "clever" mechanism to bypass
@@ -198,19 +198,19 @@ def apply_vk_method(method, handle_api_errors=True, **params):
                 return {}
             elif json_obj['error']['error_code'] == 12:
                 # execute compilation error
-                _vk_api_error_print(json_obj['error'], url_of_req, p_str)
+                _vk_api_error_print(json_obj['error'], url_of_req, params)
                 return {}
             elif json_obj['error']['error_code'] == 14:
                 # Captcha needed
-                _vk_api_error_print(json_obj['error'], url_of_req, p_str)
+                _vk_api_error_print(json_obj['error'], url_of_req, params)
                 return json_obj  # to study the response format in the future
             elif json_obj['error']['error_code'] in (3, 8, 100, 113):
                 # Wrong rquest
-                _vk_api_error_print(json_obj['error'], url_of_req, p_str)
+                _vk_api_error_print(json_obj['error'], url_of_req, params)
                 return {}
             else:
                 # In case of server problems.
-                _vk_api_error_print(json_obj['error'], url_of_req, p_str)
+                _vk_api_error_print(json_obj['error'], url_of_req, params)
                 if error_pause > 35:
                     raise
                 print('Wait ' + str(error_pause) + ' seconds')
