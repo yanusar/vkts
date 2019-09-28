@@ -1,6 +1,9 @@
 #! /usr/bin/env python3
 
-import os, shutil, sys
+import os
+import shutil
+import sys
+
 
 def remove(name):
     if os.path.isfile(name):
@@ -8,7 +11,8 @@ def remove(name):
     elif os.path.isdir(name):
         shutil.rmtree(name)
 
-# Output: is envirement usual (host) or virtual (created by virtualenv for e.g.)
+
+# Output: is envirement usual (host) or virtual (created by virtualenv for e.g)
 try:
     from colorama import init, Fore, Style
     init()
@@ -16,7 +20,7 @@ try:
         print(Fore.GREEN + 'VIRTUAL ENVIRONMENT IS ENABLED' + Style.RESET_ALL)
     else:
         print(Fore.RED + 'HOME ENVIRONMENT IS ENABLED' + Style.RESET_ALL)
-except:
+except Exception:
     if hasattr(sys, 'real_prefix'):
         print('VIRTUAL ENVIRONMENT IS ENABLED')
     else:
@@ -32,4 +36,3 @@ for name in ('.vkts', '.vklib.vkreq.log', 'responses_file',
     remove(name)
 os.chdir(os.path.pardir)
 remove('.pytest_cache')
-

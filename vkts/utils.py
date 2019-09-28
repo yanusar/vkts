@@ -2,11 +2,14 @@
 
 """The most common interfaces"""
 
-import sys, traceback, os, __main__
-from time import sleep
+import sys
+import traceback
+import __main__
+
 
 def is_py_interactive():
     return not hasattr(__main__, '__file__')
+
 
 def exception_handler(e, msg=None):
 
@@ -20,7 +23,5 @@ def exception_handler(e, msg=None):
 
     # exit if not interpreter mode enabled
     if (not isinstance(e, SystemExit)
-        and not is_py_interactive()):
-        # then
+            and not is_py_interactive()):
         sys.exit()
-

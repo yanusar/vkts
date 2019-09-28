@@ -4,8 +4,10 @@
 These include user accounts, emails, communities and universities
 of interest to user, topics, etc."""
 
-import os, json
+import os
+import json
 from .utils import exception_handler
+
 
 class UsrData:
 
@@ -58,7 +60,7 @@ class UsrData:
             d = self.__dict__
             fields = list(field_path)
             for f in fields:
-                if d == None:
+                if d is None:
                     return None
                 if isinstance(f, int):
                     assert(isinstance(d, list))
@@ -94,7 +96,7 @@ class UsrData:
             fields = list(field_path)
             last = fields.pop()
             for f in fields:
-                if f not in d or d[f] == None:
+                if f not in d or d[f] is None:
                     d[f] = {}
                 d = d[f]
 
@@ -138,7 +140,7 @@ class UsrData:
             fields = list(field_path)
             last = fields.pop()
             for f in fields:
-                if d == None:
+                if d is None:
                     return None
                 if isinstance(f, int):
                     assert(isinstance(d, list))
@@ -225,8 +227,8 @@ class UsrData:
             return obj_key, objs_dict[obj_key]
 
         except Exception as e:
-            exception_handler(e, ('Active {} account is not found.\n'
-                                  '(Maybe need to execute command ac_add for\n'
-                                  'adding account of type \'vk\' is needed or\n'
-                                  'other *_add command)'))
-
+            exception_handler(e, '\n'.join(
+                'Active {} account is not found.',
+                '(Maybe need to execute command ac_add for',
+                'adding account of type \'vk\' is needed or',
+                'other *_add command)'))

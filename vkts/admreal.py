@@ -2,11 +2,14 @@
 
 """Module for administering and monitoring vk.com communities"""
 
-import os, sys, time
+import os
+import sys
+import time
 from .report import Report
 from . import vklib as vk
 from .vklib import apply_vk_method
 from .usrdata import UsrData
+
 
 def add_group_for_monitoring(group_id):
     """Add group_id in registry of monitoring groups"""
@@ -26,6 +29,7 @@ def add_group_for_monitoring(group_id):
     # dump administrative data
     u.set(obj, 'adm', 'mon_groups')
 
+
 def remove_monitoring_group(group_id):
     """Remove monitoring group_id"""
 
@@ -41,10 +45,10 @@ def remove_monitoring_group(group_id):
                 'Monitoring groups data is incorrect: {}'.format(obj)
         # delete it from list
         if ((is_digit and obj['id'] == int(group_id))
-            or obj['domain'] == group_id):
-            #then
+                or obj['domain'] == group_id):
             u.del_('adm', 'mon_groups', i)
             break
+
 
 def display_monitoring_groups():
     """Print all monitoring group_id"""
@@ -54,6 +58,7 @@ def display_monitoring_groups():
         for obj in objs_list:
             print('{} \t{}'.format(obj['id'], obj['domain']))
         print('')
+
 
 def add_email_for_broadcasting(email):
     """Add email address for broadcast reports about monitoring groups"""
@@ -68,11 +73,13 @@ def add_email_for_broadcasting(email):
     # add email
     u.set(email, 'adm', 'bc_emails')
 
+
 def remove_broadcasting_email(email):
     """Remove email from addresses for broadcast reports
     about monitoring groups"""
 
     UsrData().del_('adm', 'bc_emails', email)
+
 
 def display_broadcasting_email():
     """Print all addresses for broadcast reports about monitoring groups"""
@@ -80,6 +87,7 @@ def display_broadcasting_email():
     adm_data = UsrData().get('adm')
     if 'bc_emails' in adm_data and adm_data['bc_emails']:
         print('{}\n'.format('\n'.join(adm_data['bc_emails'])))
+
 
 def check_updates(broadcast):
     """Check for changes in target groups, make report, send it to email"""
@@ -102,7 +110,7 @@ def check_updates(broadcast):
 
         # Check accessibility of group data
         res = apply_vk_method('groups.getMembers', group_id=g_info[0])
-        if 'error' in res and res['error']['error_code']== 203:
+        if 'error' in res and res['error']['error_code'] == 203:
             continue
 
         # Get data about group
@@ -114,7 +122,7 @@ def check_updates(broadcast):
             # Otherwise, this data will spoil the next attempt
             # to generate a report
             print('Could not load information about the group of ' + g_info[1]
-                    + ' (' + str(e) + ')')
+                  + ' (' + str(e) + ')')
             for f in new_files:
                 os.remove(f)
             sys.exit()
@@ -126,8 +134,8 @@ def check_updates(broadcast):
             os.mkdir(tg_dir + g_info[1] + '/')
         if not os.path.isdir(tg_dir + g_info[1] + '/members/'):
             os.mkdir(tg_dir + g_info[1] + '/members/')
-        out_file_name = tg_dir + g_info[1] + '/members/' \
-                        + time.strftime("%F-%H%M%S") + '.txt'
+        out_file_name = (tg_dir + g_info[1] + '/members/'
+                         + time.strftime("%F-%H%M%S") + '.txt')
         with open(out_file_name, 'w') as f:
             for user in g.members:
                 f.write(str(user) + '\n')
@@ -177,6 +185,7 @@ def check_updates(broadcast):
         if broadcast:
             r.broadcast()
 
+
 # Make report about birthday of all members of groups
 def make_birthday_calendar(group_id):
 
@@ -188,10 +197,10 @@ def make_birthday_calendar(group_id):
     g.load()
     members = g.members
     btd_list = []
-    step = 200 # instead of 1000 to avoid error 414 (URI Too Long)
+    step = 200  # instead of 1000 to avoid error 414 (URI Too Long)
     last_index = int((len(members)-1)/step)
     for i in range(0, last_index + 1):
-        if i == last_index:
+        if i == last_index:  # TODO: Why `count` is unused?
             count = len(members) % step
         else:
             count = step
@@ -224,7 +233,7 @@ def make_birthday_calendar(group_id):
         user.update({'bval_for_sort': user['bmonth'] * 100 + user['bday']})
 
     # Sort by birthday date
-    btd_list.sort(key = lambda user: user['bval_for_sort'])
+    btd_list.sort(key=(lambda user: user['bval_for_sort']))
 
     # Create calendar report
     r = Report('birthday_calendar')
@@ -234,7 +243,9 @@ def make_birthday_calendar(group_id):
         i += 1
         r.add_str('<tr>\n')
         r.add_str(' <td valign="top">' + str(i) + '.</td>\n')
-        r.add_str(' <td><a href="https://vk.com/id' + str(user['id']) + '" target="_blank"><img height=50 src="' + user['photo_max'] + '"></a></td>\n')
+        r.add_str(' <td><a href="https://vk.com/id' + str(user['id'])
+                  + '" target="_blank"><img height=50 src="'
+                  + user['photo_max'] + '"></a></td>\n')
         r.add_str(' <td valign="top">\n')
         r.add_line('  ' + user['first_name'] + ' ' + user['last_name'])
         months = ['января', 'февраля', 'марта', 'апреля',
@@ -249,4 +260,3 @@ def make_birthday_calendar(group_id):
     if not r.is_empty():
         r.conclude()
         r.dump()
-

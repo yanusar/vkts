@@ -2,9 +2,13 @@
 
 """Working with groups and users in vk"""
 
-import sys, json, os, time
+import sys
+import json
+import os
+import time
 from .vkreq import apply_vk_method, Executor
 from ..utils import exception_handler
+
 
 def _mkdir_rec(*dir_chain):
     """Recursive mkdir. For example, use `_mkdir_rec('a', 'b', 'c')` to create
@@ -15,6 +19,7 @@ def _mkdir_rec(*dir_chain):
         if not os.path.isdir(path):
             os.mkdir(path)
     return path
+
 
 class VKObj():
     """Superclass for vk objects"""
@@ -56,14 +61,15 @@ class VKObj():
                     uniq_length = len(set(val))
                     if uniq_length != len(val):
                         val_str += ', uniq items {}'.format(uniq_length)
-                except:
+                except Exception:
                     pass
 
             elif isinstance(val, dict):
                 # {int} len N
                 random_item = next(iter(val.values()))
-                val_str = '{{{}}} len {}'.format(random_item.__class__.__name__,
-                                                 len(val))
+                val_str = '{{{}}} len {}'.format(
+                    random_item.__class__.__name__,
+                    len(val))
 
             else:
                 # simple value
@@ -143,6 +149,7 @@ class VKObj():
         for field in obj:
             setattr(self, field, obj[field])
 
+
 # Check user for existance university of univer_ids in list of his universities
 def _is_student(user_item, univer_ids):
     """Does the user profile indicate that he studied at a university?"""
@@ -162,6 +169,7 @@ def _is_student(user_item, univer_ids):
 
     return False
 
+
 class Group(VKObj):
     """A class containing information about the community and a list of
     its members.
@@ -180,7 +188,7 @@ class Group(VKObj):
         self.group_id = str(group_id)
         self.count = 0
         self.members = []
-        self.cumul_members = [] # cumulative list of former & current members
+        self.cumul_members = []  # cumulative list of former & current members
         self.univers_data = {}
 
     def _get_key(self):
@@ -323,7 +331,7 @@ class Group(VKObj):
             # make auxiliary class instance and fill it
             univer = _UniversityInGroup()
             for f in self.univers_data[uname]:
-                 setattr(univer, f, self.univers_data[uname][f])
+                setattr(univer, f, self.univers_data[uname][f])
             setattr(univer, 'name', uname)
 
             # get usual class representation and format it a bit
@@ -338,6 +346,7 @@ class Group(VKObj):
 
     def is_empty(self):
         return self.count == 0
+
 
 class _UniversityInGroup():
     """Auxiliary class for `Group.load_students()` and `Group.__repr__()`"""
@@ -355,7 +364,7 @@ class _UniversityInGroup():
         # making a step of 1000 (the maximum allowed by api) requests.
         # But it does not matter: the critical limitation of method users.get
         # is it's runtime on the server.
-        step = 500
+        step = 100
 
         for i in range(0, group.count, step):
             user_ids_s = ','.join(map(str, group.members[i:i+step]))
@@ -373,6 +382,7 @@ class _UniversityInGroup():
         # save data
         usr_objs = [x for x in response if _is_student(x, self.univer_ids)]
         self.students += [x['id'] for x in usr_objs]
+
 
 def load_groups(groups, extra_getById=()):
     """Fast load groups data thanks to vk api method `execute`.
@@ -394,6 +404,7 @@ def load_groups(groups, extra_getById=()):
     for g in groups:
         g.update_cumulative()
 
+
 class University(VKObj):
     """A class containing information about the university"""
 
@@ -404,25 +415,26 @@ class University(VKObj):
             if not name.islower():
                 raise
             for ch in name:
-                if not ch in 'abcdefghijklmnopqrstuvwxyz_0123456789':
+                if ch not in 'abcdefghijklmnopqrstuvwxyz_0123456789':
                     raise
 
             # init data
             self.name = name
             self.ids = list(map(int, ids))
 
-        except:
+        except Exception as e:
             exception_handler(e, 'Invalid character in university name: '
-                                 + '"{}"'.format(ch))
+                              + '"{}"'.format(ch))
 
     def _get_key(self):
         """Key for dump"""
         return self.name
 
+
 class User(VKObj):
     """TODO: rewrite like Group"""
 
-    def __init__(self, user_id, univer_ids = []):
+    def __init__(self, user_id, univer_ids=[]):
 
         # Assert
         if type(user_id) != int:
@@ -436,8 +448,8 @@ class User(VKObj):
         self.friends = []
         # for univer friends:
         self.univer_ids = univer_ids
-        self.univer_friends = [] # university membership is listed in account
-        self.univer_degree = 0. # len(univer_friends)/len(friends)
+        self.univer_friends = []  # university membership is listed in account
+        self.univer_degree = 0.  # len(univer_friends)/len(friends)
         # other data:
         self.is_student = False
         self.photo_max = ''
@@ -445,8 +457,8 @@ class User(VKObj):
         self.last_name = ''
         self.nickname = ''
         self.scrname = ''
-        self.byear = 0 # year of birthday
-        self.sex = 0 # like in vk API: 0 - unknown, 1 - female, 2 - male
+        self.byear = 0  # year of birthday
+        self.sex = 0  # like in vk API: 0 - unknown, 1 - female, 2 - male
         # flag of relevance
         self.is_relevant = False
 
@@ -458,7 +470,8 @@ class User(VKObj):
                                    fields='universities,occupation,photo_max,'
                                           + 'screen_name,nickname,bdate,sex')
         if response:
-            self.is_student = _is_student(response['response'], self.univer_ids)
+            self.is_student = _is_student(response['response'],
+                                          self.univer_ids)
             if response['response']['photo_max']:
                 self.photo_max = response['response']['photo_max']
             else:
@@ -488,7 +501,8 @@ class User(VKObj):
 
         # Getting the remaining friends
         for i in range(1, int((self.count-1)/5000) + 1):
-            response = apply_vk_method('friends.get', user_id=str(self.user_id),
+            response = apply_vk_method('friends.get',
+                                       user_id=str(self.user_id),
                                        offset=i*5000, count=5000,
                                        fields='universities,occupation')
             if bool(response):

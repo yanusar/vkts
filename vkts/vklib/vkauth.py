@@ -1,8 +1,9 @@
-#coding utf8
 # https://github.com/good-move/VKAuth
+
 import requests
 import getpass
 from html.parser import HTMLParser
+
 
 class FormParser(HTMLParser):
     def __init__(self):
@@ -33,7 +34,8 @@ class FormParser(HTMLParser):
                 self.method = attrs['method']
         elif tag == 'input' and 'type' in attrs and 'name' in attrs:
             if attrs['type'] in ['hidden', 'text', 'password']:
-                self.params[attrs['name']] = attrs['value'] if 'value' in attrs else ''
+                self.params[attrs['name']] = \
+                    attrs['value'] if 'value' in attrs else ''
         elif tag == 'input' and 'type' in attrs:
             if attrs['type'] == 'submit':
                 self.params['submit_allow_access'] = True
@@ -56,7 +58,8 @@ class FormParser(HTMLParser):
 
 class VKAuth(object):
 
-    def __init__(self, permissions, app_id, api_v, email=None, pswd=None, two_factor_auth=False, security_code=None, auto_access=True):
+    def __init__(self, permissions, app_id, api_v, email=None, pswd=None,
+                 two_factor_auth=False, security_code=None, auto_access=True):
         """
         @args:
             permissions: list of Strings with permissions to get from API
@@ -64,23 +67,24 @@ class VKAuth(object):
             api_v: (String) vk API version
         """
 
-        self.session        = requests.Session()
-        self.form_parser    = FormParser()
-        self._user_id       = None
-        self._access_token  = None
-        self.response       = None
+        self.session         = requests.Session()
+        self.form_parser     = FormParser()
+        self._user_id        = None
+        self._access_token   = None
+        self.response        = None
 
-        self.permissions    = permissions
-        self.api_v          = api_v
-        self.app_id         = app_id
-        self.two_factor_auth= two_factor_auth
-        self.security_code  = security_code
-        self.email          = email
-        self.pswd           = pswd
-        self.auto_access    = auto_access
+        self.permissions     = permissions
+        self.api_v           = api_v
+        self.app_id          = app_id
+        self.two_factor_auth = two_factor_auth
+        self.security_code   = security_code
+        self.email           = email
+        self.pswd            = pswd
+        self.auto_access     = auto_access
 
-        if security_code != None and two_factor_auth == False:
-            raise RuntimeError('Security code provided for non-two-factor authorization')
+        if security_code is not None and not two_factor_auth:
+            raise RuntimeError(
+                'Security code provided for non-two-factor authorization')
 
     def auth(self):
         """
@@ -95,16 +99,21 @@ class VKAuth(object):
         display = 'wap'
         api_version = self.api_v
 
-        auth_url_template = '{0}?client_id={1}&scope={2}&redirect_uri={3}&display={4}&v={5}&response_type=token'
-        auth_url = auth_url_template.format(api_auth_url, app_id, ','.join(permissions), redirect_uri, display, api_version)
+        auth_url_template = ('{0}?client_id={1}&scope={2}&redirect_uri={3}'
+                             '&display={4}&v={5}&response_type=token')
+        auth_url = auth_url_template.format(api_auth_url, app_id,
+                                            ','.join(permissions),
+                                            redirect_uri, display, api_version)
 
         self.response = self.session.get(auth_url)
 
-        #look for <form> element in response html and parse it
+        # look for <form> element in response html and parse it
         if not self._parse_form():
-            raise RuntimeError('No <form> element found. Please, check url address')
+            raise RuntimeError(
+                'No <form> element found. Please, check url address')
         else:
-            # try to log in with email and password (stored or expected to be entered)
+            # try to log in with email and password
+            # (stored or expected to be entered)
             if not self._log_in():
                 return
 
@@ -145,8 +154,9 @@ class VKAuth(object):
 
         try:
             parser.feed(str(self.response.content))
-        except:
-            print('Unexpected error occured while looking for <form> element')
+        except Exception as e:
+            print('Unexpected error occured while looking for <form> '
+                  'element: ' + str(e))
             return False
 
         return True
@@ -168,20 +178,20 @@ class VKAuth(object):
                 print("Error: ConnectionError\n", err)
             except requests.exceptions.Timeout as err:
                 print("Error: Timeout\n", err)
-            except:
-                print("Unexpecred error occured")
+            except Exception as e:
+                print("Unexpecred error occured: " + str(e))
 
         else:
             self.response = None
 
     def _log_in(self):
 
-        if self.email == None:
+        if self.email is None:
             self.email = ''
             while self.email.strip() == '':
                 self.email = input('Enter an email to log in: ')
 
-        if self.pswd == None:
+        if self.pswd is None:
             self.pswd = ''
             while self.pswd.strip() == '':
                 self.pswd = getpass.getpass('Enter the password: ')
@@ -189,7 +199,8 @@ class VKAuth(object):
         self._submit_form({'email': self.email, 'pass': self.pswd})
 
         if not self._parse_form():
-            raise RuntimeError('No <form> element found. Please, check url address')
+            raise RuntimeError(
+                    'No <form> element found. Please, check url address')
 
         # if wrong email or password
         if 'pass' in self.form_parser.params:
@@ -209,29 +220,33 @@ class VKAuth(object):
         if prefix not in self.form_parser.url:
             self.form_parser.url = prefix + self.form_parser.url
 
-        if self.security_code == None:
-            self.security_code = input('Enter security code for two-factor authentication: ')
+        if self.security_code is None:
+            self.security_code = input(
+                'Enter security code for two-factor authentication: ')
 
         self._submit_form({'code': self.security_code})
 
         if not self._parse_form():
-            raise RuntimeError('No <form> element found. Please, check url address')
+            raise RuntimeError(
+                'No <form> element found. Please, check url address')
 
     def _allow_access(self):
 
         parser = self.form_parser
 
-        if 'submit_allow_access' in parser.params and 'grant_access' in parser.url:
+        if ('submit_allow_access' in parser.params
+                and 'grant_access' in parser.url):
+
             if not self.auto_access:
                 answer = ''
-                msg =   'Application needs access to the following details in your profile:\n' \
-                        + str(self.permissions) + '\n' \
-                        + 'Allow it to use them? (yes or no)'
+                msg = ('Application needs access to the following details in '
+                       'your profile:\n' + str(self.permissions) + '\n'
+                       'Allow it to use them? (yes or no)')
 
                 attempts = 5
                 while answer not in ['yes', 'no'] and attempts > 0:
                     answer = input(msg).lower().strip()
-                    attempts-=1
+                    attempts -= 1
 
                 if answer == 'no' or attempts == 0:
                     self.form_parser.url = self.form_parser.denial_url

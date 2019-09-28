@@ -3,7 +3,8 @@
 """Implementation of the main functions of the application: editing user data,
 thematic search, other console commands"""
 
-import sys, re
+import sys
+import re
 from collections import Counter
 from .report import Report
 from . import vklib as vk
@@ -11,9 +12,11 @@ from .vklib import apply_vk_method
 from .usrdata import UsrData
 from .utils import exception_handler
 
+
 ####################################################################
 ##                        Account commands                        ##
 ####################################################################
+
 
 def add_account():
     """Interactive function of account adding"""
@@ -25,7 +28,7 @@ def add_account():
         in_str = input('What type of account do you want to create?\n'
                        + 'Input please one letter - [e]mail, [v]k.ru\n'
                        + 'or [t]elegram: ').lower()
-        ac_type = {'e':'email', 'v':'vk', 't':'telegram'}[in_str]
+        ac_type = {'e': 'email', 'v': 'vk', 't': 'telegram'}[in_str]
 
         # Account name
         ac_name = input('\nInput name of new account: ').lower()
@@ -35,7 +38,7 @@ def add_account():
               + 'unencrypted on your computer) or private (you\n'
               + 'will be forced to enter the password every run)?')
         in_str = input('Input please [f]ake or [p]rivate: ').lower()
-        ac_privacy = {'f':'fake', 'p':'private'}[in_str]
+        ac_privacy = {'f': 'fake', 'p': 'private'}[in_str]
 
         # User name
         if ac_type == 'email' or ac_type == 'vk':
@@ -61,10 +64,12 @@ def add_account():
     except Exception as e:
         exception_handler(e, 'Failed to enter account data')
 
+
 def delete_account(ac_type, ac_name):
     """Deletion account ac_name of type ac_type from registry"""
 
     UsrData().del_('acc', ac_type, ac_name, correct_is_act=True)
+
 
 def activate_account(ac_type, ac_name):
     """Choose active account"""
@@ -73,6 +78,7 @@ def activate_account(ac_type, ac_name):
     if ac_name in u.get('acc', ac_type):
         u.drop_activations('acc', ac_type)
         u.set(True, 'acc', ac_type, ac_name, 'is_activated')
+
 
 def display_accounts():
     """Display all accounts and active marks"""
@@ -96,9 +102,11 @@ def display_accounts():
                                                 else '')))
         print('')
 
+
 ####################################################################
 ##                      University commands                       ##
 ####################################################################
+
 
 # Search hot university ids by un_groups
 def search_hot_university_ids(un_groups, un_ids):
@@ -124,7 +132,7 @@ def search_hot_university_ids(un_groups, un_ids):
     e.emit_requests()
 
     # Count university appearances
-    un_ids_cnt = {un_id:0 for un_id in un_ids}
+    un_ids_cnt = {un_id: 0 for un_id in un_ids}
     for item in users_education:
         if 'university' in item:
             un_id = str(item['university'])
@@ -132,8 +140,7 @@ def search_hot_university_ids(un_groups, un_ids):
                 un_ids_cnt[un_id] += 1
                 continue
         if ('occupation' in item
-            and item['occupation']['type'] == 'university'):
-            # then
+                and item['occupation']['type'] == 'university'):
             un_id = str(item['occupation']['id'])
             if un_id in un_ids_cnt:
                 un_ids_cnt[un_id] += 1
@@ -147,6 +154,7 @@ def search_hot_university_ids(un_groups, un_ids):
 
     return hot_ids
 
+
 def add_university():
     """Interactive function of adding data abaot university"""
 
@@ -155,8 +163,8 @@ def add_university():
 
         # Name of university
         un_name = input(
-              'Input please simple name of university (better in short latin;\n'
-              + 'for example: mipt, msu, mgimo): \n> ')
+            'Input please simple name of university (better in short latin;\n'
+            + 'for example: mipt, msu, mgimo): \n> ')
 
         # Titles of university
         print('Input please all titles of university (for example:\n'
@@ -204,11 +212,12 @@ def add_university():
         assert un_items
 
         # Ask the user to clarify the results
-        print('Database search results may contain extra items.\n'
-              + 'Check it please. You will see chanks of 10 items in turn.\n'
-              + 'For every chank enter the numbers corresponding to the wrong\n'
-              + 'elements (for example, 239 if corr. three items are wrong).\n'
-              + 'Then press [ENTER].')
+        print(
+            'Database search results may contain extra items.\n'
+            + 'Check it please. You will see chanks of 10 items in turn.\n'
+            + 'For every chank enter the numbers corresponding to the wrong\n'
+            + 'elements (for example, 239 if corr. three items are wrong).\n'
+            + 'Then press [ENTER].')
         tmp = un_items
         un_items = []
         for i in range(0, len(tmp), 10):
@@ -283,10 +292,12 @@ def add_university():
     except Exception as e:
         exception_handler(e, 'Failed to enter or add university data')
 
+
 def delete_university(un_name):
     """Deletion un_name from registry"""
 
     UsrData().del_('univ', un_name, correct_is_act=True)
+
 
 def activate_university(un_name):
     """Choose active university for analysis"""
@@ -295,6 +306,7 @@ def activate_university(un_name):
     if un_name in u.get('univ'):
         u.drop_activations('univ')
         u.set(True, 'univ', un_name, 'is_activated')
+
 
 def display_universities():
     """Display data for all universities"""
@@ -306,8 +318,8 @@ def display_universities():
     for un_name in univs:
         univ_obj = univs[un_name]
         print(un_name + '{}'.format('\t\t\t\t<- ACTIVATED'
-                                     if univ_obj['is_activated']
-                                     else ''))
+                                    if univ_obj['is_activated']
+                                    else ''))
         print('Title:             {}'.format(', '.join(univ_obj['titles'])))
         s = ', '.join([x['domain'] for x in univ_obj['big_groups']])
         print('Big vk groups:     {}'.format(s))
@@ -327,15 +339,17 @@ def display_universities():
 
         # Hot identifiers with temperature in parentheses
         sum_cnt = sum([x['temp'] for x in univ_obj['hot_ids']])
-        s =', '.join(['{} ({:.1f} %)'.format(x['id'], 100*x['temp']/sum_cnt)
-                       for x in univ_obj['hot_ids']])
+        s = ', '.join(['{} ({:.1f} %)'.format(x['id'], 100*x['temp']/sum_cnt)
+                      for x in univ_obj['hot_ids']])
         print('Hot VK ids:        {}'.format(s))
 
         print('')
 
+
 ####################################################################
 ##                        VK API commands                         ##
 ####################################################################
+
 
 # Any user-defined vk API method
 def vk_method(method_name, args):
@@ -343,14 +357,17 @@ def vk_method(method_name, args):
     args_dict = {x[0]: x[1] for x in args_list}
     return apply_vk_method(method_name, handle_api_errors=False, **args_dict)
 
+
 ####################################################################
 ##                         Other commands                         ##
 ####################################################################
 
+
 # Search new crystal students among friends of given set of crystal students
 def load_crystal_students_from_friends(given_crystal,
-                                       exceptions_list, # users not to be searched for
-                                   univer_ids):
+                                       exceptions_list,  # users not to be
+                                                         # searched for
+                                       univer_ids):
     new_crystal = []
     for user_id in given_crystal:
         u = vk.User(user_id, univer_ids)
@@ -364,6 +381,7 @@ def load_crystal_students_from_friends(given_crystal,
     new_crystal = list(set(new_crystal) - set(exceptions_list))
     print('with except new_crystal: ' + str(len(new_crystal)))
     return new_crystal
+
 
 # Load friends of given users list with counters of repetitions
 # Return: generate dict {id0:num_of_repeat(id0), id1:..., ...}
@@ -382,9 +400,10 @@ def load_friends_of_users_with_cnt(users_list):
     # Exclude original users
     users_set = set(users_list)
     friends_cnt_filtered = \
-        {x:friends_cnt[x] for x in friends_cnt if x not in users_set}
+        {x: friends_cnt[x] for x in friends_cnt if x not in users_set}
 
     return friends_cnt_filtered
+
 
 # Load ids of friends of users and write them to data/users_packs/pack_name
 def load_users_friends_to_users_pack(user_ids, pack_name, univer_ids):
@@ -403,6 +422,7 @@ def load_users_friends_to_users_pack(user_ids, pack_name, univer_ids):
     # Write
     vk.write_users_pack(friends_list, pack_name)
 
+
 # Wrapper for method users.search
 def users_search_wrapper(university_id, **p):
     response = apply_vk_method('users.search', university=university_id,
@@ -412,6 +432,7 @@ def users_search_wrapper(university_id, **p):
     else:
         return []
 
+
 # Load list of phystechs using method users.search
 # WARNING: Don't use it too often. Otherwise account will be banned.
 # TODO: Обобщить на другие вузы (МГИМО, СПбГУ, Бауманка, МГЮА, универсальный),
@@ -420,7 +441,7 @@ def load_phystechs_by_search(pack_name):
 
     # Getting list of phystechs
     phystechs_list = users_search_wrapper(55111, {'sort': 0})
-#TODO: После отладки новой версии раскоментить и удалить след. строку
+# TODO: После отладки новой версии раскоментить и удалить след. строку
     phystechs_list = phystechs_list[10]
 #    phystechs_list += users_search_wrapper(55111, **{'sort': 1})
 #    phystechs_list += users_search_wrapper(55111, **{'age_to': 25})
@@ -449,9 +470,11 @@ def load_phystechs_by_search(pack_name):
 #    #print('Moscow: ' + str(len(list(set(phystechs_list)))))
 #    phystechs_list += users_search_wrapper(297, **{'city': 857}) # Долгопрудный
 #    #print('Dolgoprudny: ' + str(len(list(set(phystechs_list)))))
-#    for n in ['Александр', 'Сергей', 'Дмитрий', 'Андрей', 'Алексей', 'Владимир', 'Михаил',
-#              'Игорь', 'Евгений', 'Юрий', 'Никита', 'Олег', 'Николай', 'Иван', 'Павел']:
-#        phystechs_list += users_search_wrapper(297, **{'q': urllib.parse.quote(n)})
+#    for n in ['Александр', 'Сергей', 'Дмитрий', 'Андрей', 'Алексей',
+#              'Владимир', 'Михаил', 'Игорь', 'Евгений', 'Юрий', 'Никита',
+#              'Олег', 'Николай', 'Иван', 'Павел']:
+#        phystechs_list += users_search_wrapper(297,
+#                                               **{'q': urllib.parse.quote(n)})
 #    #print('Names: ' + str(len(list(set(phystechs_list)))))
 
     # Sort result & delete repeats
@@ -461,6 +484,7 @@ def load_phystechs_by_search(pack_name):
     # Write & return
     vk.write_users_pack(phystechs_list, pack_name)
     return
+
 
 # Read from groups of set members of university (field 'univer_members')
 def read_crystal_students_of_groups_pack(pack_name):
@@ -475,13 +499,14 @@ def read_crystal_students_of_groups_pack(pack_name):
 
     return crystal_students
 
+
 #
 def make_users_list_with_add_info(users_list,
                                   univer_groups_packs_list,
                                   thematic_groups_packs_list):
-    ext_users_list = [{'id':x,
-                       'univer_groups':[],
-                       'thematic_groups':[]} for x in users_list]
+    ext_users_list = [{'id': x,
+                       'univer_groups': [],
+                       'thematic_groups': []} for x in users_list]
 
     for groups_pack in univer_groups_packs_list:
         groups_list = vk.read_groups_pack(groups_pack)
@@ -505,6 +530,7 @@ def make_users_list_with_add_info(users_list,
 
     return ext_users_list
 
+
 # Create report about thematic student by list with
 # information (id, their groups packs) about them
 def make_thematic_report(ext_users_list, univer_ids):
@@ -525,7 +551,9 @@ def make_thematic_report(ext_users_list, univer_ids):
         i += 1
         r.add_str('<tr>\n')
         r.add_str(' <td valign="top">' + str(i) + '.</td>\n')
-        r.add_str(' <td><a href="https://vk.com/id' + str(ext_user['id']) + '" target="_blank"><img height=50 src="' + u.photo_max + '"></a></td>\n')
+        r.add_str(' <td><a href="https://vk.com/id' + str(ext_user['id'])
+                  + '" target="_blank"><img height=50 src="' + u.photo_max
+                  + '"></a></td>\n')
         r.add_str(' <td valign="top">\n')
         r.add_line('  ' + u.first_name + ' ' + u.last_name)
         r.add_str(' <td valign="top">\n')
@@ -533,11 +561,13 @@ def make_thematic_report(ext_users_list, univer_ids):
         if u.is_student:
             r.add_str('PROFILE, ')
         for group in ext_user['univer_groups']:
-            r.add_str('<a = href="https://vk.com/club' + group[0] + '" target="_blank">' + group[1] + '</a>, ')
+            r.add_str('<a = href="https://vk.com/club' + group[0]
+                      + '" target="_blank">' + group[1] + '</a>, ')
         r.add_str('<br>')
         r.add_str('  Thematic: ')
         for group in ext_user['thematic_groups']:
-            r.add_str('<a = href="https://vk.com/club' + group[0] + '" target="_blank">' + group[1] + '</a>, ')
+            r.add_str('<a = href="https://vk.com/club' + group[0]
+                      + '" target="_blank">' + group[1] + '</a>, ')
         r.add_str(' </td>\n')
         r.add_str('</tr>\n')
 
@@ -546,6 +576,7 @@ def make_thematic_report(ext_users_list, univer_ids):
     if not r.is_empty():
         r.conclude()
         r.dump()
+
 
 def get_thematic_students_by_their_groups():
 
@@ -558,7 +589,8 @@ def get_thematic_students_by_their_groups():
 
     # Load friends of user 23681294 (Концертный Физтеха)
     # to data/users_packs/mipt_crystal_us
-    #load_users_friends_to_users_pack(['23681294'], 'mipt_crystal_us', univer_ids)
+    #load_users_friends_to_users_pack(['23681294'], 'mipt_crystal_us',
+    #                                 univer_ids)
     ## TODO: Фильтрации здесь или в конце
     ## TODO: убрать всё crystal в одну ф-ию
     ## TODO: раскоментить search
@@ -643,8 +675,8 @@ def get_thematic_students_by_their_groups():
     intersection.sort()
     extended_intersection = \
         make_users_list_with_add_info(intersection,
-                                 ['mipt_crystal_gr', 'mipt_very'],
-                                 ['thematic_very', 'thematic_roughly'])
+                                      ['mipt_crystal_gr', 'mipt_very'],
+                                      ['thematic_very', 'thematic_roughly'])
     make_thematic_report(extended_intersection, univer_ids)
 
     #intersection = list((cryst_friends_10 & thematic_very) - exceptions)
@@ -660,4 +692,3 @@ def get_thematic_students_by_their_groups():
     #intersection.sort()
     #print(len(intersection))
     #print(intersection)
-

@@ -2,9 +2,11 @@
 
 """Interfaces for working with packages of groups and users"""
 
-import sys, os
-from .vkobjs import *
-from .hotreqs import *
+import sys
+import os
+from .vkobjs import User, Group
+from .hotreqs import domain_2_digital_id, get_group_name, get_group_domain
+
 
 # Add group in data/groups_packs/pack_name by group_id or screen_name
 def add_group_to_pack(pack_name, some_group_id):
@@ -33,10 +35,11 @@ def add_group_to_pack(pack_name, some_group_id):
                 sys.exit()
 
     # Add group in file
-    new_line = group_id + ' # ' + scrname + ' # ' \
-               + get_group_name(group_id) + '\n'
+    new_line = (group_id + ' # ' + scrname + ' # '
+                + get_group_name(group_id) + '\n')
     with open('data/groups_packs/' + pack_name, 'a') as f:
         f.write(new_line)
+
 
 # Remove group from data/groups_packs/pack_name by group_id or screen_name
 def rem_group_from_pack(pack_name, some_group_id):
@@ -71,6 +74,7 @@ def rem_group_from_pack(pack_name, some_group_id):
     with open('data/groups_packs/' + pack_name, 'w') as f:
         f.write('\n'.join(lines) + ('\n' if lines else ''))
 
+
 # Return list of group_ids of given pack
 def read_groups_pack(pack_name):
     if not os.path.isfile('data/groups_packs/' + pack_name):
@@ -81,7 +85,9 @@ def read_groups_pack(pack_name):
     groups = [x.split(' # ')[0] for x in lines]
     return groups
 
+
 ###   Interfaces for working with users packages   ###
+
 
 # Add user in data/users_packs/pack_name by user_id or screen_name
 def add_user_to_pack(some_user_id, pack_name, comment=''):
@@ -90,7 +96,7 @@ def add_user_to_pack(some_user_id, pack_name, comment=''):
     if some_user_id.isdigit():
         user_id = some_user_id
     else:
-        user_id = str(domain_2_digital_id(scrname))
+        user_id = str(domain_2_digital_id(some_user_id))
 
     # Build dir if absent
     if not os.path.isdir('data/users_packs'):
@@ -103,6 +109,7 @@ def add_user_to_pack(some_user_id, pack_name, comment=''):
     with open('data/users_packs/' + pack_name, 'a') as f:
         f.write(new_line)
 
+
 # Remove user from data/users_packs/pack_name by user_id or screen_name
 def rem_user_from_pack(some_user_id, pack_name):
 
@@ -110,7 +117,7 @@ def rem_user_from_pack(some_user_id, pack_name):
     if some_user_id.isdigit():
         user_id = some_user_id
     else:
-        user_id = str(domain_2_digital_id(scrname))
+        user_id = str(domain_2_digital_id(some_user_id))
 
     # Check existence of pack
     if not os.path.isfile('data/users_packs/' + pack_name):
@@ -137,6 +144,7 @@ def rem_user_from_pack(some_user_id, pack_name):
     with open('data/users_packs/' + pack_name, 'w') as f:
         f.write('\n'.join(lines) + ('\n' if lines else ''))
 
+
 # Write list of user ids (users_list) to file in data/users_packs/
 def write_users_pack(users_list, pack_name):
     if not os.path.isdir('data/users_packs/'):
@@ -144,6 +152,7 @@ def write_users_pack(users_list, pack_name):
     with open('data/users_packs/' + pack_name, 'w') as f:
         for user in users_list:
             f.write(str(user) + '\n')
+
 
 # Get members list of users pack
 def read_users_pack(pack_name):
@@ -155,11 +164,13 @@ def read_users_pack(pack_name):
         users_list = [int(x.split(' # ')[0]) for x in lines]
     return users_list
 
+
 ###   Common interfaces for working with packages   ###
+
 
 # For groups in set data/groups_packs/pack_name load members list
 # and write it to data/users_packs/pack_name
-def load_users_pack_by_groups_pack(pack_name, univer_ids = []):
+def load_users_pack_by_groups_pack(pack_name, univer_ids=[]):
 
     # Get list of groups
     groups = read_groups_pack(pack_name)
@@ -167,7 +178,7 @@ def load_users_pack_by_groups_pack(pack_name, univer_ids = []):
     # Getting list of members of groups
     members_list = []
     for g_id in groups:
-        g = vk.Group(g_id, univer_ids)
+        g = Group(g_id, univer_ids)
         g.open()
         if g.is_empty():
             g.load()
@@ -181,6 +192,7 @@ def load_users_pack_by_groups_pack(pack_name, univer_ids = []):
     # Write members to data/users_packs/
     write_users_pack(members_list, pack_name)
 
+
 # Write 'False' to field 'is_relevant' of all stored groups
 def drop_relevance_flag_of_all_groups():
     if not os.path.isdir('data/groups/'):
@@ -192,6 +204,7 @@ def drop_relevance_flag_of_all_groups():
         g.open()
         g.is_relevant = False
 
+
 # Write 'False' to field 'is_relevant' of all stored users
 def drop_relevance_flag_of_all_users():
     if not os.path.isdir('data/users/'):
@@ -202,4 +215,3 @@ def drop_relevance_flag_of_all_users():
         u = User(user_id)
         u.read_info()
         u.is_relevant = False
-

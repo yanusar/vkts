@@ -2,18 +2,21 @@
 
 """Testing of vkts bash-commands ac_*, un_*, monitor_*, broadcast_*"""
 
-import pytest, json, os
+import json
 import subprocess as sp
+
 
 def bash_cmd(args, stdin=None):
     process = sp.Popen(args, stdin=sp.PIPE, stdout=sp.PIPE)
     res, _ = process.communicate(input=(stdin.encode() if stdin else None))
     return res.decode()
 
+
 def vkts_cmd(s, stdin=None):
     args = ['vkts'] + s.split()
     res = bash_cmd(args, stdin)
     return res
+
 
 def test_01_vk_accounts():
 
@@ -58,6 +61,7 @@ def test_01_vk_accounts():
     vkts_cmd('ac_rem vk ivan')
     assert '' == vkts_cmd('ac_see')
 
+
 def test_02_various_accounts():
 
     ###   $ vkts ac_add ... 4 times ; vkts ac_see
@@ -84,6 +88,7 @@ def test_02_various_accounts():
             'email\n    petka: \t[testB@mail.com|None]    \t<- activated\n\n'))
             == vkts_cmd('ac_see'))
 
+
 def test_03_universities():
 
     ###   $ vkts un_add ...
@@ -102,7 +107,7 @@ def test_03_universities():
                             {"count": 17, "items": [69810, 71142, 73115, 75566, 77630, 77663, 78393, 79210, 79431, 84364, 86580, 92084, 94718, 99055, 101554, 103946, 142579796]}
                         ]
                     },
-                    {"response": 
+                    {"response":
                         [[
                             {"id": 5505, "first_name": "Сергей", "last_name": "Гижа", "occupation": {"type": "university", "id": 297, "name": "МФТИ (Физтех)"}},
                             {"id": 103946, "first_name": "Артём", "last_name": "Вдовенко"},
@@ -206,6 +211,7 @@ def test_03_universities():
             'Hot VK ids:        297 (54.5 %), 55111 (45.5 %)\n\n'))
             == vkts_cmd('un_see'))
 
+
 def test_04_broadcast():
 
     #bash_cmd(['rm', os.path.join('.vkts', 'adm_data.json')])
@@ -239,6 +245,7 @@ def test_04_broadcast():
     vkts_cmd('broadcast_rem testB@mail.com')
     assert (''
             == vkts_cmd('broadcast_see'))
+
 
 def test_05_monitor():
 
@@ -281,4 +288,3 @@ def test_05_monitor():
     vkts_cmd('monitor_rem memphi_official')
     assert (''
             == vkts_cmd('monitor_see'))
-

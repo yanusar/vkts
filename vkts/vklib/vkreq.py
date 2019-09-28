@@ -4,7 +4,11 @@
 `apply_vk_method`. For speedup you can use class `Executor`, wich pack
 many requests to packs by 25 requests."""
 
-import urllib.request, json, time, os, getpass
+import urllib.request
+import json
+import time
+import os
+import getpass
 from . import vkauth
 from ..usrdata import UsrData
 import logging
@@ -21,6 +25,7 @@ logger.addHandler(handler)
 
 _token = None
 mock_responses = '.mock_request_responses.json'
+
 
 def update_token():
     """Read token from local user data or get new one from vk.com"""
@@ -58,18 +63,18 @@ def update_token():
         while not pswd:
             pswd = getpass.getpass('Input password of vk account'
                                    + ' «{}»: '.format(ac_name))
-        user_auth = vkauth.VKAuth(permissions = ['friends',
-                                                 'groups',
-                                                 'wall'],
-                                  app_id = '6471192',
-                                  api_v = '5.74',
-                                  email = email,
-                                  pswd = pswd)
+        user_auth = vkauth.VKAuth(permissions=['friends',
+                                               'groups',
+                                               'wall'],
+                                  app_id='6471192',
+                                  api_v='5.74',
+                                  email=email,
+                                  pswd=pswd)
         user_auth.auth()
         _token = user_auth._access_token
 
     # Here token must be
-    if _token == None:
+    if _token is None:
         logger.debug("Failed to get token")
         raise
 
@@ -77,6 +82,7 @@ def update_token():
     if ac_obj['password']:
         u.set(_token, 'acc', 'vk', ac_name, 'token')
     logger.debug("Token is updated")
+
 
 def _make_params_string(**params):
     """Convert list of parameters to string"""
@@ -91,6 +97,7 @@ def _make_params_string(**params):
                       for f in params.keys()])
     return p_str
 
+
 def _short_print(s):
     # shrink output if it's too long
     if len(s) <= 500:
@@ -98,10 +105,12 @@ def _short_print(s):
     else:
         print('{}  ......  {}'.format(s[:245], s[-245:]))
 
+
 def _vk_api_error_print(obj, url_of_req, p_str):
     print("vk API error code: {}".format(obj['error_code']))
     print(obj['error_msg'])
     _short_print("Broken request: {}{}".format(url_of_req, p_str))
+
 
 def _vk_api_request(url_of_req, method, p_str):
     """Request (can be mocked by existence of file
@@ -129,6 +138,7 @@ def _vk_api_request(url_of_req, method, p_str):
 
     return json_obj
 
+
 def apply_vk_method(method, handle_api_errors=True, **params):
     """Make request to https://api.vk.com/method/. Return JSON-object"""
 
@@ -149,10 +159,11 @@ def apply_vk_method(method, handle_api_errors=True, **params):
         try:
             # Request
             json_obj = _vk_api_request(url_of_req, method, p_str)
-        except:
+        except Exception as e:
             # In case of network problems.
-            logger.debug("Request Error")
+            logger.debug("Request Error: " + str(e))
             _short_print("Broken request: {}{}".format(url_of_req, p_str))
+            print(e)
             if error_pause > 35:
                 raise
             print('Wait ' + str(error_pause) + ' seconds')
@@ -192,7 +203,7 @@ def apply_vk_method(method, handle_api_errors=True, **params):
             elif json_obj['error']['error_code'] == 14:
                 # Captcha needed
                 _vk_api_error_print(json_obj['error'], url_of_req, p_str)
-                return json_obj # to study the response format in the future
+                return json_obj  # to study the response format in the future
             elif json_obj['error']['error_code'] in (3, 8, 100, 113):
                 # Wrong rquest
                 _vk_api_error_print(json_obj['error'], url_of_req, p_str)
@@ -212,6 +223,7 @@ def apply_vk_method(method, handle_api_errors=True, **params):
         break
 
     return json_obj
+
 
 class Executor:
     """Class for exploit vk API method `execute` to join
@@ -258,9 +270,9 @@ class Executor:
         self.processors.append(processor)
 
     def emit_requests(self):
-        """Pack requests from `Executor.requests` (see `Executor.add_request()`)
-        into `execute` requests and emit them to server. Responses will be saved
-        in `Executor.responses`."""
+        """Pack requests from `Executor.requests`
+        (see `Executor.add_request()`) into `execute` requests and emit them
+        to server. Responses will be saved in `Executor.responses`."""
 
         logger.debug("Emit requests (%s pieces)", len(self.requests))
         self.responses = []
@@ -312,7 +324,7 @@ class Executor:
             # save responses
             self.responses += r['response']
             if 'execute_errors' in r:
-                self.errors += r['execute_errors']
+                self.errors.append(r['execute_errors'])
 
             # process responses
             while cnt:
@@ -323,4 +335,3 @@ class Executor:
 
         self.requests = []
         self.processors = []
-

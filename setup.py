@@ -1,7 +1,11 @@
 #! /usr/bin/env python3
 
-import os, re, shutil, glob
+import os
+import re
+import shutil
+import glob
 from setuptools import setup, find_packages, Command
+
 
 class CleanCommand(Command):
     """Custom clean command to tidy up the project root."""
@@ -23,9 +27,11 @@ class CleanCommand(Command):
                 print('removing {}'.format(os.path.relpath(path)))
                 shutil.rmtree(path, ignore_errors=True)
 
+
 def read(fname):
     with open(os.path.join(os.path.dirname(__file__), fname)) as f:
         return f.read()
+
 
 def read_reqs(fname):
     with open(fname, 'r') as f:
@@ -34,10 +40,11 @@ def read_reqs(fname):
         lines = [x for x in lines if x]
     return lines
 
+
 setup(
     name = 'vkts',
     fullname = 'VK Thematic Search',
-    version = '0.0.2',
+    version = '0.0.3',
     author = 'Denis Stepnov',
     author_email = 'stepnovdenis@gmail.com',
     url = 'https://github.com/smurphik/vkts',
@@ -58,4 +65,3 @@ setup(
         'License :: OSI Approved :: MIT License',
     ],
 )
-

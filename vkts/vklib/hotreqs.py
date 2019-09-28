@@ -5,13 +5,16 @@
 from .vkreq import apply_vk_method, Executor
 from collections.abc import Iterable
 
+
 def get_group_domain(group_id):
     response = apply_vk_method('groups.getById', group_id=group_id)
     return response['response'][0]['screen_name']
 
+
 def get_group_name(group_id):
     response = apply_vk_method('groups.getById', group_id=group_id)
     return response['response'][0]['name']
+
 
 def resolve_group_ids(group_ids):
     """resolve_group_ids(digit id or domain of group) -> digit_id, domain_id.
@@ -55,6 +58,7 @@ def resolve_group_ids(group_ids):
 
     return digit_id, domain_id
 
+
 def get_user_name(user_id):
     response = apply_vk_method('users.get', user_ids=user_id)
     if response:
@@ -62,6 +66,7 @@ def get_user_name(user_id):
                + response['response'][0]['last_name']
     else:
         return 'No name'
+
 
 def resolve_user_ids(user_id):
     """resolve_user_ids(digit id or domain of user) -> digit_id, domain_id"""
@@ -80,7 +85,7 @@ def resolve_user_ids(user_id):
 
     return digit_id, domain_id
 
+
 def domain_2_digital_id(domain):
     response = apply_vk_method('utils.resolveScreenName', screen_name=domain)
     return response['response']['object_id']
-
