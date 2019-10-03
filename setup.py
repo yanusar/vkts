@@ -44,7 +44,7 @@ def read_reqs(fname):
 setup(
     name = 'vkts',
     fullname = 'VK Thematic Search',
-    version = '0.0.5',
+    version = '0.0.6',
     author = 'Denis Stepnov',
     author_email = 'stepnovdenis@gmail.com',
     url = 'https://github.com/smurphik/vkts',

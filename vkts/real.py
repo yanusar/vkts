@@ -122,10 +122,11 @@ def search_hot_university_ids(un_groups, un_ids):
     users = list(set(users))
 
     # load education info about users
+    step = 100
     e = vk.Executor()
     users_education = []
-    for i in range(0, len(users), 500):
-        ids_str = ','.join(list(map(str, users[i:i+500])))
+    for i in range(0, len(users), step):
+        ids_str = ','.join(list(map(str, users[i:i+step])))
         e.add_request('users.get', user_ids=ids_str,
                       fields='occupation,education,universities',
                       processor=users_education.extend)
